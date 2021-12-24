@@ -10,27 +10,29 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { OktaAuthStateService } from '@okta/okta-angular';
+import { Component, OnInit } from '@angular/core';
 import { OktaAuth } from '@okta/okta-auth-js';
 
+interface Claim {
+  claim: string;
+  value: string;
+}
+
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  selector: 'app-profile',
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.css']
 })
-export class AppComponent {
-  title = 'app';
+export class ProfileComponent implements OnInit {
+  claims: Claim[] = [];
 
-  constructor(public authStateService: OktaAuthStateService, private oktaAuth: OktaAuth) {
+  constructor(public oktaAuth: OktaAuth) {
 
   }
 
-  async login() {
-    await this.oktaAuth.signInWithRedirect({ originalUri: '/' });
+  async ngOnInit() {
+    const userClaims = await this.oktaAuth.getUser();
+    this.claims = Object.entries(userClaims).map(entry => ({ claim: entry[0], value: entry[1] }));
   }
 
-  async logout() {
-    await this.oktaAuth.signOut();
-  }
 }
